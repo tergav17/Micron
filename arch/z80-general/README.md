@@ -1,2 +1,2 @@
 # Z80-General Overview
-  The Z80-General architecture is designed for barebones z80 machines, or for people who want to quickly port MICRON to a simple Z80 system without writing too much new code. 
+  The Z80-General architecture is designed for barebones z80 machines, or for people who want to quickly port MICRON to a simple Z80 system without writing too much new code. The only requirements for z80-general is a decent sized chunk of continuous memory and a timed interrupt for context switching. Any MICRON Basic binaries compiled for z80-general do not need to be recompliled across z80-general platforms (unless it is something like a device driver where is uses special hardware call commands). This does NOT support bank switching or paging.
