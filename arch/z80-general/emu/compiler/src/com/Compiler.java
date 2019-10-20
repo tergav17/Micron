@@ -571,6 +571,22 @@ public class Compiler {
 							firstStage = firstStage + "160FCD!7B32[" + args[1] + "]3E0032[" + args[1] + "+1]";
 							addressCounter = addressCounter + 14;
 						} 
+					} else if (args[0].equals("CLOCK1") && args.length == 2) {
+						firstStage = firstStage + "1604CD!7B";
+						addressCounter = addressCounter + 6;
+						if(prepareByteTargetPrimitive(args[1],i) == 1) return 1;
+					} else if (args[0].equals("CLOCK2") && args.length == 2) {
+						firstStage = firstStage + "1605CD!7B";
+						addressCounter = addressCounter + 6;
+						if(prepareByteTargetPrimitive(args[1],i) == 1) return 1;
+					} else if (args[0].equals("CLOCK3") && args.length == 2) {
+						firstStage = firstStage + "1606CD!7B";
+						addressCounter = addressCounter + 6;
+						if(prepareByteTargetPrimitive(args[1],i) == 1) return 1;
+					} else if (args[0].equals("CLOCK4") && args.length == 2) {
+						firstStage = firstStage + "1607CD!7B";
+						addressCounter = addressCounter + 6;
+						if(prepareByteTargetPrimitive(args[1],i) == 1) return 1;
 					} else {
 						System.out.println("Unidentified Symbol On Line " + (i+1));
 						return 1;
