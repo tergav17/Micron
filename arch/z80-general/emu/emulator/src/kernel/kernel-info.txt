@@ -1,0 +1,114 @@
+Kernel Commamds (Reg D = Selector):
+*00:Forfit Time Slice
+*01:Kill Process (Reg E = Selected Process)
+*02:Sleep/Wake Process (Reg E = Selected Process, Reg C = Process Sleep[!0]/Wake[0])
+*03:Get Process Status (Reg E = Selected Process / Returns Process Status Block)
+*04:Gets Byte 1 Of Uptime (Reg E = Returned Time)
+*05:Gets Byte 2 Of Uptime (Reg E = Returned Time)
+*06:Gets Byte 3 Of Uptime (Reg E = Returned Time)
+*07:Gets Byte 4 Of Uptime (Reg E = Returned Time)
+*08:Reset Uptime
+*09:Get Process ID (Reg E = Returned PID)
+*0A:Deallocate All Process Memory (Reg E = Selected Process)
+*0B:Deallocate Memory (Reg E = Start Block Address, Reg C = Segment Length)
+*0C:Allocate Memory For Current Process (Reg C = Block Length / Returned Start Pointer, Reg D = Returned 00h If Success)
+*0D:Allocate Memory For Process (Reg C = Block Length / Returned Start Pointer, Reg E = Seleced Process , Reg D = Returned 00h If Success)
+*0E:Get Free Blocks (Reg E = Returned Blocks Free)
+*0F:Get Largest Segment (Reg E = Returned Segment Length)
+*10:Demark All Process Pipes (Reg E = Selected Process)
+*11:Demark Pipe (Reg C = Pipe ID)
+*12:Mark Pipe For Current Process (Reg C = Memory Block Pointer / Returned Pipe ID, Reg D = Returned 00h If Success)
+*13:Mark Pipe For Process (Reg C = Memory Block Pointer / Returned Pipe ID, Reg E = Selected Process, Reg D = Returned 00h If Success)
+*14:Write To Pipe Channel 0 (Reg C = Pipe ID, Reg E = Contents, Reg D =  Returned 00h If Success)
+*15:Write To Pipe Channel 1 (Reg C = Pipe ID, Reg E = Contents, Reg D =  Returned 00h If Success)
+*16:Read Pipe Channel 0 (Reg C = Pipe ID, Reg E = Returned Contents, Reg D = Returned 00h If Success)
+*17:Read Pipe Channel 1 (Reg C = Pipe ID, Reg E = Returned Contents, Reg D = Returned 00h If Success)
+*18:Set Channel 0 On Write Process Wake (Reg C = Pipe ID, Reg E = Selected Process, Reg D = Returned 00h If Success)
+*19:Set Channel 1 On Write Process Wake (Reg C = Pipe ID, Reg E = Selected Process, Reg D = Returned 00h If Success)
+*1A:Set Channel 0 On Read Process Wake (Reg C = Pipe ID, Reg E = Selected Process, Reg D = Returned 00h If Success)
+*1B:Set Channel 1 On Read Process Wake (Reg C = Pipe ID, Reg E = Selected Process, Reg D = Returned 00h If Success)
+*1C:Init PRGLOADER (Reg E = Block Length)
+*1D:Write PRGLOADER (Reg E = Byte To Write, Reg D = Returned 0FFh if finished)
+*1E:Skip Args
+*1F:Finish PRGLOADER
+*20:Write PRGLOADER Clean (Reg E = Byte To Write)
+
+Context Block Layout:
+XXX0: 1-Unused
+XXX2: 2-AF
+XXX4: 2-BC
+XXX6: 2-DE 
+XXX8: 2-HL
+XXXA: 2-PC
+XXXC: 2-SP
+XXXD: 1-Status byte
+XXXE: 1-Unused
+XXXF: 1-Unused
+
+Memory Allocation Table:
+
+The Memory Allocation Table (MEMT) is a 256 byte long portion of memory. Each byte in the MEMT refers to a block
+of real memory which is 256 bytes long. The actual value of a byte in the MEMT refers to the process it is allocated
+to. All portions of memory allocated at once that are larger than 1 block long, they need to be right next to eachother
+in memory.
+
+Pipe Marker Table:
+
+The Pipe Marker Table (PIPE) is a 256 byte long portion of memory. Each byte in the PIPE refers directly to a block
+of memory. If the byte in the PIPE is FFh, it indicates that there is no pipe in that block of memory. If the value of
+the byte is one of a process ID, it means that there is a pipe there and it is allocated to the process.
+
+A pipe in memory is divided into two different channels. Each channel buffers information, and transmits it one way. 
+The first channel (Channel 0) sends information from the creator (Host) of the pipe to the client. The second channel
+(Channel 1) sends information from the client to the host. Each channel can buffer up to 124 bytes, with 4 bytes acting
+as control.
+
+Pipe Layout:
+                     (Channel 0)
+00: [1][2][3][4][5][6][7][8][0][0][0][0][0][0][0][0]
+10: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+20: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+30: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+40: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+50: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+60: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+70: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+80: [0][0][0][0]
+	                 (Channel 1)
+80: [-][-][-][-][0][0][0][0][0][0][0][0][0][0][0][0]
+90: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+A0: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+B0: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+C0: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+D0: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+E0: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+F0: [0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]
+
+0: Buffer Memory
+1: Channel 0 Read Index
+2: Channel 0 Write Index
+3: Channel 0 On Read Process Wake
+4: Channel 0 On Write Process Wake
+5: Channel 1 Read Index
+6: Channel 1 Write Index
+7: Channel 1 On Read Process Wake
+8: Channel 1 On Write Process Wake
+
+MICRON Error Code Reference:
+00: Success
+01: No Memory Available
+02: Bad Process ID
+03: Invalid Pipe
+04: Pipe Buffer Full
+05: Pipe Buffer Empty	
+06: Pipe Already Marked
+07: Process Count Limit
+10: File Non-Existant
+11: Sector Non-Existant
+12: Subdevice Not Ready
+13: Subdevice Non-Existant
+14: No Sectors Available
+15: Bad Filename
+16: FSD Non-Existant
+17: FSD Limit Reached
+18: FSD Already Exists
