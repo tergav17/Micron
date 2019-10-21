@@ -115,10 +115,14 @@ The contents of HELLO.TXT will be typed onto the terminal
   
   Examples:
 ```
-.MN DK0:
+.UM DK0:
 ```
 Tells the driver DK to unmount subdevice 0.
 
+```
+.UM IO*:
+```
+Tells the driver IO to detach itself from the system, and terminate.
 # Write File (WR.PRG)
   This utility will create a new specified file. When that file is created, ```*``` will be typed onto the terminal. Anything that the user types will be outputted onto the terminal and written into the new file. When ESC is pressed, the program terminates.
   
