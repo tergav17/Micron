@@ -1,0 +1,199 @@
+MICRON File I/O Protocal:
+
+	Under the MICRON system, all file access is done through a file system driver (FSD).
+The standard protocal for all FSD's includes no subdirectores, and 8.3 file names.
+Files are accessed by reading and writing sectors (128 byte portion of memory). Each file
+can support under the protocal 65535 sectors, making the largest size for a file about
+8 MB. Each FSD can also support up to 8 (0-7) subdevices, which can be mounted and unmounted
+at will. FSD's can be loaded and unloaded from memory at will, and the amount of FSD's that
+can be loaded depends on the specifications of CONS.SYS (System Console). All FSD's 
+communicate directly with CONS.SYS, which then are by proxy able to be accessed by user
+applications. All commands and file data I/O are done through FSD COM pipe. This pipe is
+hosted on the FSD, and is accessed by CONS.SYS. 
+
+	Through the COM pipe, file sectors can be read and written, files can be created or 
+deleted, and sectors can be added or removed from the file. In addition, subdevices can
+be mounted, unmounted, formatted, and file directories can be read. 
+
+Commands:
+
+	00: Do Nothing
+	01: Read A Sector
+	02: Write A Sector
+	03: Create A File (An existing file will be overwritten)
+	04: Delete A File
+	05: Add Sector To File
+	06: Remove Sector From File
+	07: Get Subdevice Status
+	08: Mount A Subdevice
+	09: Unmount A Subdevice
+	0A: Format A Subdevice
+	0B: Read A Directory Entry
+	0C: Get Free Sectors
+	
+	Below are some examples of inputs and outputs from the COM pipe
+	
+Read A Sector:
+	
+	The following example will read sector 05h from file HELLO.TXT on subdevice 00h
+	
+	Input:  01,       00,        05,00,   "HELLO.TXT",00
+		    [Command][Subdevice][Sector #][File Name][Zero Termination]
+		   
+	Output: 00,      XX,XX,..,XX
+			[Status][128 Byte Sector]
+			
+	If the status on the output is not 00, and instead returns a MICRON error code, the
+	sector will NOT be sent through the output pipe.
+	
+Write A Sector:
+
+	The following example will write sector 100h from file AUTOEXEC.BAT on subdevice 00h
+	
+	Input:  02,        00,       00,01,   "AUTOEXEC.BAT",00,                                XX,XX,..,XX
+		    [Command][Subdevice][Sector #][File Name]   [Zero Termination]{WAIT FOR OUTPUT}[128 Byte Sector]
+		   
+	Output: 00
+			[Status]
+			
+	If the status on the output is not 00, and instead returns a MICRON error code, do
+	not attempt to send the sector through the input pipe, but instead assume that the
+	FSD is ready to accept a new command.
+	
+Create A File:
+
+	The following example will create file DATA.BIN, with a length of 4 sectors on subdevice 00h
+	
+	Input:  03,       00,        04,00        "DATA.BIN", 00
+		    [Command][Subdevice][Sector Count][File Name][Zero Termination]
+			
+	Output: 00
+			[Status]
+	
+	If the status on the output is not 00, and instead returns a MICRON error code, assume
+	that the file has NOT been created. The minimum amount of sectors is 1, if a file with 0 
+	sectors is attempted to be created, it will be created with 1 sector.
+	
+Delete A File:
+
+	The following example will names file NAMES.TXT on subdevice 00h
+	
+	Input:  04,       01,       "NAMES.TXT",00
+	        [Command][Subdevice][File Name][Zero Termination]
+			
+	Output: 00
+			[Status]
+			
+	If the status on the output is not 00, and instead returns a MICRON error code, assume
+	that the file has NOT been deleted
+	
+{REMOVED} Add Sector To File:
+
+	The following example will add 03h sectors to TEST.HEX on subdevice 00h
+	
+	Input:  05,       00,        03,00,       "TEST.HEX", 00
+			[Command][Subdevice][Sector Count][File Name][Zero Termination]
+			
+	Output: 00
+			[Status]
+			
+	If the status on the output is not 00, and instead returns a MICRON error code, assume
+	that the file has not gained any sectors
+	
+{REMOVED} Remove Sector From File:
+
+	The following example will remove 021h sectors to OUT.BIN on subdevice 00h
+	
+	Input:  06,       01,        21,00,       "OUT.BIN", 00
+			[Command][Subdevice][Sector Count][File Name][Zero Termination]
+			
+	Output: 00
+			[Status]
+			
+	If the status on the output is not 00, and instead returns a MICRON error code, assume
+	that the file has not lost any sectors
+	
+Get Subdevice Status:
+
+	The following example will get the status of subdevice 03h
+	 
+	Input:  07,       03
+	        [Command][Subdevice #]
+			
+	Output: 00
+	        [Status]
+			
+	If the status is 00, the subdevice is ready, otherwise it is not ready.
+	
+Mount A Subdevice:
+
+	The following example will mount subdevice 02h
+	
+	Input:  08,       02
+		    [Command][Subdevice #]
+	
+	Output: 00
+		    [Status]
+			
+	If the status is 00, the subdevice is mounted and ready, otherwise it is not ready
+	
+Unmount A Subdevice:
+
+	The following example will unmount subdevice 06h
+	
+	Input:  09,       06
+	        [Command][Subdevice #]
+			
+	Output: 00
+			[Status]
+			
+	The status 00 will return when the FSD is ready to take a new command
+	
+Format A Subdevice:
+
+	The following example will format subdevice 01h
+	
+	Input:  0A,       01
+	        [Command][Subdevice #]
+			
+	Output: 00
+			[Status]
+			
+	If the status is 00, the subdevice is unmounted but formatted, otherwise it is not
+	
+Read A Directory Entry:
+
+	The following example will read directory entry 01h from subdevice 06h
+	
+	Input:  0B,       06,          01
+			[Command][Subdevice #][Directory Entry #]
+			
+	Output: 00,      XX,XX,..,XX
+			[Status][16 Byte Directory Entry]
+			
+	If the status on the output is not 00, and instead returns a MICRON error code, the
+	directory entry will NOT be sent through the output pipe
+	
+	A directory entry is made up of 16 bytes, the following example is the directory entry
+	for "NCAT.DEV"
+	
+	"NCAT",00,00,00,00,"DEV",           04,00         00,00,  00
+	[File Name]        [File Extension][Sector Count][Unused][Has Next Entry?]
+	
+	If the "Has Next Entry?" byte is 00, it indicates that there is another entry
+	after it.
+	
+Get Free Sectors:
+
+	The following example will get the number of free sectors in subdevice 00h
+	
+	Input:  0C,       00
+	        [Command][Subdevice #]
+			
+	Outpt:  00,      FF,01,03
+	        [Status][Sector Count]
+			
+	If the status on the output is not 00, and instead returns a MICRON error code, the
+	directory entry will NOT be sent through the output pipe
+			
+	The result of this example indicates that there is 0301FFh sectors free
