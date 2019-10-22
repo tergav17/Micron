@@ -1,5 +1,5 @@
 # MICRON Overview
- MICRON is a multitasking, portable operating system aimed at 8/16 systems. It is designed to be modular, easy to port, and run on just about anything. All operating system components (excluding the kernel itself) are written in MICRON Basic, a simple language I made wrote that is brutally simple to write a compiler for. All applications are also written in MICRON Basic, and can be cross compiled for any architecture without the need for modification. 
+ MICRON is a multitasking, portable operating system aimed at 8/16 bit systems. It is designed to be modular, easy to port, and run on just about anything. All operating system components (excluding the kernel itself) are written in MICRON Basic, a simple language I made wrote that is brutally simple to write a compiler for. All applications are also written in MICRON Basic, and can be cross compiled for any architecture without the need for modification. 
  
 # MICRON Features
  MICRON features the following:
